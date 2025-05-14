@@ -1,0 +1,63 @@
+{
+    "version": 2,
+    "name": "无限流跑团",
+    "disableSend": true,
+    "placeBeforeInput": true,
+    "injectInput": false,
+    "color": "rgba(0, 0, 0, 0)",
+    "onlyBorderColor": false,
+    "qrList": [
+        {
+            "id": 2,
+            "showLabel": false,
+            "label": "升级选项",
+            "title": "升级选项",
+            "message": "<Request: 【升级选项】，我已经完成一个章节，本次不输出小说或者角色扮演，请为我进行选项升级>",
+            "contextList": [],
+            "preventAutoExecute": true,
+            "isHidden": false,
+            "executeOnStartup": false,
+            "executeOnUser": false,
+            "executeOnAi": false,
+            "executeOnChatChange": false,
+            "executeOnGroupMemberDraft": false,
+            "executeOnNewChat": false,
+            "automationId": ""
+        },
+        {
+            "id": 6,
+            "showLabel": false,
+            "label": "模板更新升级",
+            "title": "",
+            "message": "<Request: 【模板更新升级】，我已经选好了升级选项/进行了模组结算，本次不输出小说或者角色扮演，请为我进行人物模板的全面升级，并对角色的变量进行更新>",
+            "contextList": [],
+            "preventAutoExecute": true,
+            "isHidden": false,
+            "executeOnStartup": false,
+            "executeOnUser": false,
+            "executeOnAi": false,
+            "executeOnChatChange": false,
+            "executeOnGroupMemberDraft": false,
+            "executeOnNewChat": false,
+            "automationId": ""
+        },
+        {
+            "id": 4,
+            "showLabel": false,
+            "label": "模组结算",
+            "title": "",
+            "message": "<Request: 【模组结算】，我已经完成了本次模组，本次不输出小说或者角色扮演，请为我进行模组最终结算>",
+            "contextList": [],
+            "preventAutoExecute": true,
+            "isHidden": false,
+            "executeOnStartup": false,
+            "executeOnUser": false,
+            "executeOnAi": false,
+            "executeOnChatChange": false,
+            "executeOnGroupMemberDraft": false,
+            "executeOnNewChat": false,
+            "automationId": ""
+        }
+    ],
+    "idIndex": 6
+}
