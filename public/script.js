@@ -362,9 +362,9 @@ DOMPurify.addHook('uponSanitizeElement', (node, _, config) => {
     }
 
     // Replace line breaks with <br> in unknown elements
-    if (node instanceof HTMLUnknownElement) {
-        node.innerHTML = node.innerHTML.replaceAll('\n', '<br>');
-    }
+    // if (node instanceof HTMLUnknownElement) {
+        // node.innerHTML = node.innerHTML.replaceAll('\n', '<br>');
+    // }
 
     const isMediaAllowed = isExternalMediaAllowed();
     if (isMediaAllowed) {
@@ -2169,6 +2169,60 @@ export function messageFormatting(mes, ch_name, isSystem, isUser, messageId, san
         mes = mes.replaceAll('\\begin{align*}', '$$');
         mes = mes.replaceAll('\\end{align*}', '$$');
         mes = converter.makeHtml(mes);
+
+    // 开始修复逻辑
+    const customBlockTagNames = [
+        'now_plot', 'world_situation', 'details', 'summary',
+        'time_location', 'now_main_plot', 'now_information',
+        'relationship_web', 'interactive_people', 'interactive_single', 'interactive_group',
+        'user_now_status', 'four_choice', 'plot_summary',
+        'world_status',
+        // !! 确保这个列表包含了所有你希望作为块级处理的自定义标签名 !!
+        // 观察你的HTML，<details> 和 <summary> 后面也可能需要处理
+    ];
+
+    // 构建一个匹配这些自定义标签（开始或结束）的正则表达式部分
+    // 这个模式需要匹配 <tag>, </tag>, <tag attr="val">
+    const anyCustomTagPattern = `</?(?:${customBlockTagNames.join('|')})(?:\\s[^>]*)?>`;
+
+    // 正则表达式：匹配一个自定义标签，后面跟着可选的空白，然后是 <br />，
+    // 再后面是可选的空白和一个换行符，再后面必须是另一个自定义标签（或者是字符串结尾，以防最后一个标签后有多余br）。
+    // 目的是移除这个 <br />，保留原始的换行符。
+    // (自定义标签) (可选空白) <br /> (可选空白) (\n) (?=另一个自定义标签 或 结束)
+    const unwantedBrRegex = new RegExp(
+        `(${anyCustomTagPattern})` + // (捕获组 $1) 一个自定义标签
+        `(\\s*)` +                  // (捕获组 $2) 可选的空白字符
+        `<br\\s*/>` +               // 匹配 <br />
+        `(\\s*\\n)` +               // (捕获组 $3) 可选的空白字符和必须的换行符
+        `(?=${anyCustomTagPattern}|$)`, // 正向前瞻：确保后面是另一个自定义标签或字符串末尾
+        'gi'
+    );
+
+    let previousMes;
+    let iteration = 0;
+    const maxIterations = 10; // 防止死循环
+    do {
+        iteration++;
+        previousMes = mes;
+        mes = mes.replace(unwantedBrRegex, '$1$2$3'); // 移除 <br />, 保留 $1 (标签), $2 (标签后的空白), $3 (原br后的空白和换行)
+        if (iteration > 1) {
+            console.log(`SillyTavern Log ---- After BR removal iteration ${iteration -1}:`, JSON.stringify(mes)); // 调试点
+        }
+    } while (mes !== previousMes && iteration <= maxIterations);
+
+    if (iteration > maxIterations) {
+        console.warn("SillyTavern Log ---- Max iterations reached for BR removal. String might not be fully processed.");
+    }
+
+    // (可选) 清理可能因为上述操作产生的连续多个换行符（如果替换保留了太多\n）
+    // 但鉴于我们保留了原始的 \n，这一步可能不需要，或者需要更智能的逻辑
+    // mes = mes.replace(/(\n\s*){2,}/g, '\n'); // 将两个或多个连续的换行（中间可有空白）替换为单个换行
+
+    // (可选) 进一步清理：移除空的 <p> 标签，如果它们只包含了空白
+    mes = mes.replace(/<p>\s*<\/p>/gi, '');
+    console.log("SillyTavern Log ---- After all BR removal attempts and empty P cleanup:", JSON.stringify(mes)); // 调试点2
+
+    // 结束修复逻辑
 
         mes = mes.replace(/<code(.*)>[\s\S]*?<\/code>/g, function (match) {
             // Firefox creates extra newlines from <br>s in code blocks, so we replace them before converting newlines to <br>s.
